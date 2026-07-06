@@ -1,6 +1,6 @@
 {
   "name": "react-flow-auto-layout",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Auto layout for React Flow, built on dagre: variable-size nodes, true bounding-box centering, and straightened linear segments (no kinked connectors).",
   "keywords": [
     "react-flow",
