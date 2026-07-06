@@ -3,3 +3,5 @@ dist
 *.tsbuildinfo
 .DS_Store
 .vercel
+# Local writing drafts (Medium article, promo material), never published with the repo.
+drafts/
