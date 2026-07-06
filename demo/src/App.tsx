@@ -1,3 +1,4 @@
+import { InstallBar } from "./InstallBar";
 import { LiveGraph } from "./LiveGraph";
 
 export function App() {
@@ -23,11 +24,12 @@ export function App() {
 
       <LiveGraph />
 
+      <InstallBar />
+
       <footer className="foot">
-        <code>npm i react-flow-auto-layout</code>
         <span>
           Variable-size nodes, true bounding-box centering, straightened linear
-          edges. MIT, by Dylan Merigaud.
+          edges. No CSS to import. MIT, by Dylan Merigaud.
         </span>
       </footer>
     </div>
