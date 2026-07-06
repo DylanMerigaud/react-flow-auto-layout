@@ -71,8 +71,20 @@ export function buildGraph(branchCount: number): {
   ];
   const edges: Edge[] = [
     { id: "install-build", source: "install", target: "build" },
-    ...branches.map((id) => ({ id: `build-${id}`, source: "build", target: id })),
-    ...branches.map((id) => ({ id: `${id}-gate`, source: id, target: "gate" })),
+    // Fan-out: all leave "build", so anchor the elbow to the source (shared hub).
+    ...branches.map((id) => ({
+      id: `build-${id}`,
+      source: "build",
+      target: id,
+      data: { anchor: "source" as const },
+    })),
+    // Join: all enter "gate", so anchor the elbow to the target (shared hub).
+    ...branches.map((id) => ({
+      id: `${id}-gate`,
+      source: id,
+      target: "gate",
+      data: { anchor: "target" as const },
+    })),
     { id: "gate-deploy", source: "gate", target: "deploy" },
   ];
   return { nodes, edges };

@@ -9,6 +9,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAutoLayout } from "react-flow-auto-layout/react";
 
+import { AlignedEdge } from "./AlignedEdge";
 import { CardNode } from "./CardNode";
 import {
   branchOrder,
@@ -19,6 +20,7 @@ import {
 } from "./graph";
 
 const nodeTypes = { card: CardNode };
+const edgeTypes = { aligned: AlignedEdge };
 
 type EdgeKind = "smoothstep" | "bezier" | "straight";
 
@@ -59,7 +61,14 @@ function Flow({ settings, bodyStep }: { settings: Settings; bodyStep: number }) 
     () =>
       baseEdges.map((e) => ({
         ...e,
-        type: edgeKind === "bezier" ? "default" : edgeKind,
+        // "smoothstep" uses the aligned edge (elbows anchored to the fan-out/join
+        // hub so they line up across variable-height cards); the others are stock.
+        type:
+          edgeKind === "smoothstep"
+            ? "aligned"
+            : edgeKind === "bezier"
+              ? "default"
+              : edgeKind,
         markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
       })),
     [baseEdges, edgeKind],
@@ -79,6 +88,7 @@ function Flow({ settings, bodyStep }: { settings: Settings; bodyStep: number }) 
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
       nodesDraggable={false}
       nodesConnectable={false}
       edgesFocusable={false}
