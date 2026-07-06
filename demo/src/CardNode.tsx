@@ -15,6 +15,8 @@ const toneColor: Record<NonNullable<CardData["tone"]>, string> = {
  */
 export function CardNode({ data }: NodeProps<Node<CardData>>) {
   const accent = data.tone ? toneColor[data.tone] : "#64748B";
+  const targetPos = data.vertical ? Position.Top : Position.Left;
+  const sourcePos = data.vertical ? Position.Bottom : Position.Right;
   return (
     <div
       style={{
@@ -32,7 +34,7 @@ export function CardNode({ data }: NodeProps<Node<CardData>>) {
         transition: "box-shadow 0.3s ease",
       }}
     >
-      <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
+      <Handle type="target" position={targetPos} style={{ opacity: 0 }} />
       <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172A" }}>
         {data.title}
       </div>
@@ -41,7 +43,7 @@ export function CardNode({ data }: NodeProps<Node<CardData>>) {
           {data.body}
         </div>
       ) : null}
-      <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+      <Handle type="source" position={sourcePos} style={{ opacity: 0 }} />
     </div>
   );
 }

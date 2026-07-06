@@ -9,8 +9,8 @@ export function App() {
           <p>
             Auto layout for React Flow, built on dagre. Nodes are variable size,
             so the layout centers each parent on the true bounding box of its
-            children and keeps linear chains straight. Watch it recenter live as
-            the highlighted card grows and shrinks.
+            children and keeps linear chains straight. Change the direction, edge
+            type, spacing, or branch count and watch it recenter live.
           </p>
         </div>
         <nav className="links">
@@ -21,9 +21,7 @@ export function App() {
         </nav>
       </header>
 
-      <section className="stage">
-        <LiveGraph />
-      </section>
+      <LiveGraph />
 
       <footer className="foot">
         <code>npm i react-flow-auto-layout</code>

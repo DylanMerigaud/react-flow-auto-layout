@@ -58,12 +58,77 @@ body {
   border-color: #4f46e5;
 }
 .stage {
-  height: 440px;
+  display: flex;
+  flex-direction: column;
+  height: 520px;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fbfcfe;
+}
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.control-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+.control-label b {
+  color: #4f46e5;
+  font-variant-numeric: tabular-nums;
+}
+.segmented {
+  display: inline-flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+  border-right: 1px solid #e2e8f0;
+  font-family: inherit;
+  text-transform: capitalize;
+}
+.segmented button:last-child {
+  border-right: 0;
+}
+.segmented button.on {
+  background: #4f46e5;
+  color: #fff;
+}
+.segmented button:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+.control input[type="range"] {
+  width: 150px;
+  accent-color: #4f46e5;
+  cursor: pointer;
+}
+.canvas {
+  flex: 1;
+  min-height: 0;
 }
 /* Glide nodes to their new spot when the layout recenters, instead of jumping. */
 .react-flow__node {

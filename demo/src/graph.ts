@@ -7,66 +7,85 @@ export type CardData = {
   tone?: "start" | "branch" | "join" | "end";
   /** The card whose size changes on the loop; highlighted so the eye follows it. */
   live?: boolean;
+  /** Orientation, so the handles sit on the right edges (top/bottom vs left/right). */
+  vertical?: boolean;
 };
 
-// A workflow-shaped DAG: a linear intro, a three-way fan-out, then a join and a
-// tail. The "Director approval" card is the one that changes size on a loop, so the
-// layout has to recenter its neighbors and keep the chain straight, live.
-export const baseNodes: Node<CardData>[] = [
-  { id: "in", position: { x: 0, y: 0 }, data: { title: "Invoice received", tone: "start" } },
-  {
-    id: "extract",
-    position: { x: 0, y: 0 },
-    data: {
-      title: "Extract line items",
-      body: "Vision model reads the PDF into structured rows, totals, and tax.",
-    },
-  },
-  { id: "match", position: { x: 0, y: 0 }, data: { title: "Match to PO" } },
-  {
-    id: "mgr",
-    position: { x: 0, y: 0 },
-    data: { title: "Manager approval", tone: "branch" },
-  },
-  {
-    id: "dir",
-    position: { x: 0, y: 0 },
-    data: { title: "Director approval", tone: "branch" },
-  },
-  {
-    id: "dept",
-    position: { x: 0, y: 0 },
-    data: { title: "Department review", tone: "branch" },
-  },
-  {
-    id: "post",
-    position: { x: 0, y: 0 },
-    data: {
-      title: "Post to ledger",
-      body: "Only after every gate clears and a human confirms.",
-      tone: "join",
-    },
-  },
-  { id: "done", position: { x: 0, y: 0 }, data: { title: "Paid", tone: "end" } },
-];
+// A generic CI/CD-shaped pipeline: install, build, a parallel test fan-out, then a
+// gate and a deploy. Recognizable to anyone, no domain knowledge needed. The number
+// of test branches is adjustable at runtime (add/remove), and the "Unit tests" card
+// grows and shrinks on a loop, so the layout has to recenter and stay straight live.
 
-export const edges: Edge[] = [
-  { id: "in-extract", source: "in", target: "extract" },
-  { id: "extract-match", source: "extract", target: "match" },
-  { id: "match-mgr", source: "match", target: "mgr" },
-  { id: "match-dir", source: "match", target: "dir" },
-  { id: "match-dept", source: "match", target: "dept" },
-  { id: "mgr-post", source: "mgr", target: "post" },
-  { id: "dir-post", source: "dir", target: "post" },
-  { id: "dept-post", source: "dept", target: "post" },
-  { id: "post-done", source: "post", target: "done" },
-];
+export type CardId =
+  | "install"
+  | "build"
+  | "lint"
+  | "unit"
+  | "e2e"
+  | "types"
+  | "a11y"
+  | "gate"
+  | "deploy";
 
-// The rotating body text for the "Director approval" card. Each step changes its
-// height, which is what forces the live recentering. Empty string = a short card.
-export const dirBodies: string[] = [
+const card = (
+  id: CardId,
+  data: CardData,
+): Node<CardData> => ({ id, position: { x: 0, y: 0 }, data });
+
+// The full set of nodes. The fan-out branches (lint/unit/e2e/types/a11y) are added
+// or removed at runtime; the spine (install, build, gate, deploy) is always present.
+export const allNodes: Record<CardId, Node<CardData>> = {
+  install: card("install", { title: "Install deps", tone: "start" }),
+  build: card("build", {
+    title: "Build",
+    body: "Compile, bundle, and emit the dist artifacts.",
+  }),
+  lint: card("lint", { title: "Lint", tone: "branch" }),
+  unit: card("unit", { title: "Unit tests", tone: "branch" }),
+  e2e: card("e2e", { title: "E2E tests", tone: "branch" }),
+  types: card("types", { title: "Typecheck", tone: "branch" }),
+  a11y: card("a11y", { title: "A11y audit", tone: "branch" }),
+  gate: card("gate", {
+    title: "Merge gate",
+    body: "All checks green before merge.",
+    tone: "join",
+  }),
+  deploy: card("deploy", { title: "Deploy", tone: "end" }),
+};
+
+/** The fan-out branches in order; the demo shows the first `branchCount` of these. */
+export const branchOrder: CardId[] = ["lint", "unit", "e2e", "types", "a11y"];
+
+/** Build the node + edge set for a given number of parallel test branches. */
+export function buildGraph(branchCount: number): {
+  nodes: Node<CardData>[];
+  edges: Edge[];
+} {
+  const branches = branchOrder.slice(0, branchCount);
+  const nodes = [
+    allNodes.install,
+    allNodes.build,
+    ...branches.map((id) => allNodes[id]),
+    allNodes.gate,
+    allNodes.deploy,
+  ];
+  const edges: Edge[] = [
+    { id: "install-build", source: "install", target: "build" },
+    ...branches.map((id) => ({ id: `build-${id}`, source: "build", target: id })),
+    ...branches.map((id) => ({ id: `${id}-gate`, source: id, target: "gate" })),
+    { id: "gate-deploy", source: "gate", target: "deploy" },
+  ];
+  return { nodes, edges };
+}
+
+// The rotating body text for the "Unit tests" card. Each step changes its height,
+// which is what forces the live recentering. Empty string = a short card.
+export const liveBodies: string[] = [
   "",
-  "Required above $25k.",
-  "Required above $25k. Routes to the cost-center owner, resolved to a real person from the org chart, with a note on why it triggered.",
-  "Required above $25k. Routes to the cost-center owner.",
+  "142 passing.",
+  "142 passing across 18 files. Coverage 94%, no flakes, ran in 3.2s on the parallel runner.",
+  "142 passing across 18 files. Coverage 94%.",
 ];
+
+/** The card whose body cycles. */
+export const liveCardId: CardId = "unit";
