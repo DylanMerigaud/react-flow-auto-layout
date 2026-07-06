@@ -7,9 +7,12 @@ import {
   type Node,
 } from "@xyflow/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAutoLayout } from "react-flow-auto-layout/react";
+import {
+  AlignedStepEdge,
+  useAutoLayout,
+  withAlignedElbows,
+} from "react-flow-auto-layout/react";
 
-import { AlignedEdge } from "./AlignedEdge";
 import { CardNode } from "./CardNode";
 import {
   branchOrder,
@@ -20,7 +23,7 @@ import {
 } from "./graph";
 
 const nodeTypes = { card: CardNode };
-const edgeTypes = { aligned: AlignedEdge };
+const edgeTypes = { aligned: AlignedStepEdge };
 
 type EdgeKind = "smoothstep" | "bezier" | "straight";
 
@@ -57,22 +60,23 @@ function Flow({ settings, bodyStep }: { settings: Settings; bodyStep: number }) 
     [baseNodes, bodyStep, vertical],
   );
 
-  const edges = useMemo<Edge[]>(
-    () =>
-      baseEdges.map((e) => ({
-        ...e,
-        // "smoothstep" uses the aligned edge (elbows anchored to the fan-out/join
-        // hub so they line up across variable-height cards); the others are stock.
-        type:
-          edgeKind === "smoothstep"
-            ? "aligned"
-            : edgeKind === "bezier"
-              ? "default"
-              : edgeKind,
-        markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
-      })),
-    [baseEdges, edgeKind],
-  );
+  const edges = useMemo<Edge[]>(() => {
+    // "smoothstep" uses the aligned step edge (elbows anchored to the fan-out/join
+    // hub so they line up across variable-size cards); the others are stock.
+    // withAlignedElbows tags each edge's anchor from the graph automatically.
+    const base =
+      edgeKind === "smoothstep" ? withAlignedElbows(baseEdges) : baseEdges;
+    return base.map((e) => ({
+      ...e,
+      type:
+        edgeKind === "smoothstep"
+          ? "aligned"
+          : edgeKind === "bezier"
+            ? "default"
+            : edgeKind,
+      markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
+    }));
+  }, [baseEdges, edgeKind]);
 
   const {
     nodes: rfNodes,
