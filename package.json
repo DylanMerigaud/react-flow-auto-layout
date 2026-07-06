@@ -84,14 +84,10 @@
   "peerDependencies": {
     "@xyflow/react": ">=12.0.0",
     "dagre": ">=0.8.5",
-    "react": ">=18",
-    "react-dom": ">=18"
+    "react": ">=18"
   },
   "peerDependenciesMeta": {
     "react": {
-      "optional": true
-    },
-    "react-dom": {
       "optional": true
     }
   },
@@ -101,7 +97,6 @@
     "@types/dagre": "^0.7.54",
     "@types/node": "22.19.21",
     "@types/react": "19.2.17",
-    "@types/react-dom": "19.2.3",
     "@typescript-eslint/utils": "^8.46.1",
     "@xyflow/react": "^12.11.1",
     "dagre": "^0.8.5",
@@ -112,7 +107,6 @@
     "prettier": "3.8.4",
     "publint": "^0.3.0",
     "react": "19.2.7",
-    "react-dom": "19.2.7",
     "tsup": "^8.5.0",
     "tsx": "4.22.4",
     "typescript": "5.9.3",

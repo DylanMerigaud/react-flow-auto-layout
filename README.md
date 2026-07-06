@@ -15,7 +15,7 @@ The one that handles variable-size nodes: true bounding-box centering and straig
 
 </div>
 
-<!-- TODO: before/after GIF here (dagre kinked + off-center vs. this: straight + centered) -->
+![react-flow-auto-layout recentering a graph live as nodes resize, the direction flips, and a branch is added](https://raw.githubusercontent.com/DylanMerigaud/react-flow-auto-layout/main/docs/demo.gif)
 
 ```tsx
 import { useAutoLayout } from "react-flow-auto-layout/react";
@@ -73,7 +73,7 @@ pnpm add react-flow-auto-layout
 yarn add react-flow-auto-layout
 ```
 
-`@xyflow/react` and `dagre` are peer dependencies you already have with React Flow. `react` and `react-dom` are peers too, but only the `/react` hook needs them; the core function is framework-agnostic.
+`@xyflow/react` and `dagre` are peer dependencies you already have with React Flow. `react` is a peer too, needed only by the `/react` hook; the core function is framework-agnostic.
 
 ## It deletes the boilerplate
 
@@ -141,7 +141,7 @@ Add `react-flow-auto-layout` to this project to auto-lay-out our React Flow grap
    pnpm-lock.yaml -> `pnpm add react-flow-auto-layout`,
    yarn.lock -> `yarn add react-flow-auto-layout`,
    package-lock.json -> `npm i react-flow-auto-layout`,
-   bun.lockb -> `bun add react-flow-auto-layout`.
+   bun.lock or bun.lockb -> `bun add react-flow-auto-layout`.
    It has peer deps `@xyflow/react` and `dagre` (and `react`), which a React Flow
    project already has.
 
@@ -166,8 +166,7 @@ Add `react-flow-auto-layout` to this project to auto-lay-out our React Flow grap
 
 4. It measures our real node sizes automatically, so custom nodes with variable
    height work with no extra config. Do not set positions on the source nodes; the
-   hook computes them. There is no CSS to import from this package; keep our existing
-   React Flow stylesheet and node styles.
+   hook computes them.
 ````
 
 ## Usage
@@ -280,6 +279,8 @@ If you need nested/subflow auto-layout, `@jalez/react-flow-automated-layout` is 
 - A node that is both a single-parent branch and a multi-parent join is centered on its parents and not reordered.
 - **De-duplicate edges** and avoid self-loops; behavior with them is undefined.
 - For the pure function without the hook, run it once with estimated sizes, then again with measured sizes, or the layout shifts when real sizes land. The hook does this for you.
+- **Reference stability is not required.** You can pass inline `nodes`/`edges` arrays; the hook only re-lays-out when their structure or your options actually change, not on every render.
+- **Scale.** `layout()` is meant for the graph sizes React Flow is typically used at (tens of nodes, where it runs in a few milliseconds). It leans on dagre, so multi-hundred-node graphs cost tens to hundreds of milliseconds per layout. It runs once per structural change, not per frame.
 
 ## Contributing
 

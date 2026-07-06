@@ -24,7 +24,7 @@ test("parent centers on the children's bounding box, not the barycenter", () => 
   const barycenter = (cross(a) + cross(b)) / 2;
 
   assert.ok(
-    near(cross(p), bboxMidGuard(bboxMid)),
+    near(cross(p), bboxMid),
     `P center ${cross(p)} should equal bbox mid ${bboxMid}`,
   );
   // The two must differ here (unequal heights), so this proves the bbox pass ran
@@ -38,7 +38,3 @@ test("parent centers on the children's bounding box, not the barycenter", () => 
     `P center ${cross(p)} must NOT be the barycenter ${barycenter}`,
   );
 });
-
-// A tiny identity helper so the assert message reads clearly; keeps the numeric
-// intent obvious without an inline expression.
-const bboxMidGuard = (n: number): number => n;

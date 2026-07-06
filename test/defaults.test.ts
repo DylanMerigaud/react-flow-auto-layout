@@ -76,3 +76,18 @@ test("empty, single-node, and disconnected graphs do not throw", () => {
   assert.ok(Number.isFinite(two.get("A")!.x));
   assert.ok(Number.isFinite(two.get("B")!.y));
 });
+
+// REGRESSION (C2): an edge pointing at a node that is not in `nodes` (a dangling
+// edge, common when app state has nodes and edges briefly out of sync) must not
+// throw. The dangling edge is ignored; present nodes still get finite positions.
+test("a dangling edge (missing endpoint) does not throw", () => {
+  const laid = layout(
+    [node("A", 244, 80), node("B", 244, 80)],
+    [edge("A", "B"), edge("B", "GHOST"), edge("NOPE", "A")],
+  );
+  assert.equal(laid.length, 2);
+  for (const n of laid) {
+    assert.ok(Number.isFinite(n.position.x));
+    assert.ok(Number.isFinite(n.position.y));
+  }
+});

@@ -2,6 +2,8 @@ import { type Node } from "@xyflow/react";
 
 /** The default card width the layout falls back to when no size is supplied. */
 export const DEFAULT_NODE_WIDTH = 244;
+/** The default card height the layout falls back to when no size is supplied. */
+export const DEFAULT_NODE_HEIGHT = 80;
 /** The default gap between siblings on the cross axis. */
 export const DEFAULT_NODE_SEP = 40;
 /** The default gap between ranks (columns in LR, rows in TB). */

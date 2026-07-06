@@ -29,7 +29,7 @@ export function App() {
       <footer className="foot">
         <span>
           Variable-size nodes, true bounding-box centering, straightened linear
-          edges. No CSS to import. MIT, by Dylan Merigaud.
+          edges. MIT, by Dylan Merigaud.
         </span>
       </footer>
     </div>

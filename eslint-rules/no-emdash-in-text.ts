@@ -39,11 +39,10 @@ export const noEmdashInText = createRule({
     };
 
     // Comments aren't AST nodes you can visit directly; pull them from the source.
-    const program = (node: TSESTree.Program) => {
+    const program = () => {
       for (const c of context.sourceCode.getAllComments()) {
         checkDash(c, c.value);
       }
-      void node;
     };
 
     return {

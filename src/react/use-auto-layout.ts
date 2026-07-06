@@ -13,6 +13,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { layout } from "../layout";
 import {
+  DEFAULT_NODE_HEIGHT,
   DEFAULT_NODE_SEP,
   DEFAULT_NODE_WIDTH,
   DEFAULT_RANK_SEP,
@@ -111,7 +112,7 @@ export const useAutoLayout = <
     nodeSep = DEFAULT_NODE_SEP,
     rankSep = DEFAULT_RANK_SEP,
     defaultWidth = DEFAULT_NODE_WIDTH,
-    defaultHeight = 80,
+    defaultHeight = DEFAULT_NODE_HEIGHT,
     sizeOf,
     fitViewOnLayout = true,
     fitViewOptions,
@@ -136,12 +137,19 @@ export const useAutoLayout = <
   const [relayoutTick, setRelayoutTick] = useState(0);
   const initialized = useNodesInitialized();
 
-  // The key identifying the current source graph; a change forces a fresh layout.
-  const graphKey =
-    sourceNodes.map((n) => n.id).join("|") +
-    "::" +
-    sourceEdges.length +
-    (vertical ? "::v" : "::h");
+  // The key identifying the current layout inputs; a change forces a fresh layout.
+  // It encodes node ids, edge ENDPOINTS (not just the count, so a rewire is caught),
+  // and every layout parameter (so changing spacing or direction re-lays-out).
+  // JSON.stringify gives an unambiguous, delimiter-safe serialization.
+  const graphKey = JSON.stringify([
+    sourceNodes.map((n) => n.id),
+    sourceEdges.map((e) => [e.source, e.target]),
+    vertical,
+    nodeSep,
+    rankSep,
+    defaultWidth,
+    defaultHeight,
+  ]);
 
   const laidOutFor = useRef<string>("");
   // The measured sizes the current layout used, so a later drift is detectable.
@@ -168,8 +176,14 @@ export const useAutoLayout = <
     },
   );
 
-  // Reset to the new source graph HIDDEN when it changes, forcing a fresh layout.
+  // Re-hide and force a fresh layout ONLY when the layout inputs actually change
+  // (graphKey), not on every render. A consumer passing inline `nodes`/`edges`
+  // arrays changes their reference each render; gating on graphKey (a ref compare)
+  // instead of array identity is what stops a re-hide + relayout loop and its flicker.
+  const resetFor = useRef<string>("");
   useEffect(() => {
+    if (resetFor.current === graphKey) return;
+    resetFor.current = graphKey;
     setNodes(
       sourceNodes.map((n) => ({
         ...n,
@@ -179,7 +193,27 @@ export const useAutoLayout = <
     setEdges(sourceEdges);
     laidOutFor.current = "";
     setIsLaidOut(false);
-  }, [sourceNodes, sourceEdges, setNodes, setEdges]);
+    // Deps are graphKey (not the arrays): the reset must fire on a real input change,
+    // not on every render when a consumer passes inline arrays. The arrays are read
+    // fresh inside. (This project's ESLint does not run react-hooks/exhaustive-deps,
+    // which would otherwise flag this deliberate choice.)
+  }, [graphKey, setNodes, setEdges]);
+
+  // When the source nodes change WITHOUT a structural change (same graphKey, e.g. a
+  // label or `data` update), merge the new data into the laid-out nodes in place,
+  // keeping their computed position and visibility. This reflects content updates
+  // without the re-hide + relayout that a structural change triggers.
+  useEffect(() => {
+    if (resetFor.current !== graphKey) return; // a structural reset handles that case
+    const incoming = new Map(sourceNodes.map((n) => [n.id, n]));
+    setNodes((cur) =>
+      cur.map((n) => {
+        const src = incoming.get(n.id);
+        if (!src || (src.data === n.data && src.type === n.type)) return n;
+        return { ...n, data: src.data, type: src.type };
+      }),
+    );
+  }, [sourceNodes, graphKey, setNodes]);
 
   // Once measured, lay out on the real sizes, reveal, and fit. The ref guard makes
   // this run once per graph.

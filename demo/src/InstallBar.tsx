@@ -31,8 +31,7 @@ const AGENT_PROMPT = `Add react-flow-auto-layout to this project to auto-lay-out
    wired to <ReactFlow onNodesChange={...} /> or the layout never runs (it needs the measurement events).
 
 4. It measures real node sizes automatically, so custom nodes with variable height work with no extra
-   config. Do not set positions on the source nodes; the hook computes them. There is no CSS to import
-   from this package; keep the existing React Flow stylesheet and node styles.`;
+   config. Do not set positions on the source nodes; the hook computes them.`;
 
 export function InstallBar() {
   const [pm, setPm] = useState<Manager>("npm");

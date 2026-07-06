@@ -2,6 +2,7 @@ import { type Node, type Edge } from "@xyflow/react";
 import dagre from "dagre";
 
 import {
+  DEFAULT_NODE_HEIGHT,
   DEFAULT_NODE_SEP,
   DEFAULT_NODE_WIDTH,
   DEFAULT_RANK_SEP,
@@ -40,7 +41,7 @@ export const layout = <
     nodeSep = DEFAULT_NODE_SEP,
     rankSep = DEFAULT_RANK_SEP,
     defaultWidth = DEFAULT_NODE_WIDTH,
-    defaultHeight = 80,
+    defaultHeight = DEFAULT_NODE_HEIGHT,
   } = options;
 
   // The rendered size per node. Heights (and widths) are VARIABLE, and guessing
@@ -56,6 +57,15 @@ export const layout = <
   const heightOf = (id: string): number =>
     size.get(id)?.height ?? defaultHeight;
 
+  // Only edges whose BOTH endpoints are real nodes. A dangling edge (an endpoint
+  // not in `nodes`, common when app state has nodes and edges briefly out of sync)
+  // would otherwise make dagre create a phantom node with no coordinates, which the
+  // centering passes then read and crash on.
+  const present = new Set(nodes.map((n) => n.id));
+  const realEdges = edges.filter(
+    (e) => present.has(e.source) && present.has(e.target),
+  );
+
   const g = new dagre.graphlib.Graph();
   g.setGraph({
     // Horizontal (LR) by default; vertical (TB) when asked, where a wide
@@ -69,7 +79,7 @@ export const layout = <
   for (const n of nodes) {
     g.setNode(n.id, { width: widthOf(n.id), height: heightOf(n.id) });
   }
-  for (const e of edges) g.setEdge(e.source, e.target);
+  for (const e of realEdges) g.setEdge(e.source, e.target);
   dagre.layout(g);
 
   // The CROSS axis is the one a parent is centered on, across its children: the
@@ -93,7 +103,7 @@ export const layout = <
 
   const childrenOf = new Map<string, string[]>();
   const parentsOf = new Map<string, string[]>();
-  for (const e of edges) {
+  for (const e of realEdges) {
     childrenOf.set(e.source, [...(childrenOf.get(e.source) ?? []), e.target]);
     parentsOf.set(e.target, [...(parentsOf.get(e.target) ?? []), e.source]);
   }
@@ -141,6 +151,10 @@ export const layout = <
     const kid = kids[0];
     if (kid === undefined) continue;
     if ((parentsOf.get(kid) ?? []).length !== 1) continue; // target: single parent
+    // Don't move a target that is itself a fan-out parent: it was already centered
+    // on its own children's bounding box, and snapping it onto the source would
+    // override that (dragging it back to the barycenter this library exists to fix).
+    if ((childrenOf.get(kid) ?? []).length >= 2) continue;
     cross.set(kid, cross.get(id) ?? crossOf(kid));
   }
 

@@ -10,13 +10,11 @@
   },
   "dependencies": {
     "@xyflow/react": "^12.11.1",
-    "dagre": "^0.8.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-flow-auto-layout": "^0.1.0"
   },
   "devDependencies": {
-    "@types/dagre": "^0.7.54",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^4.3.4",
