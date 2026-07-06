@@ -77,18 +77,13 @@ yarn add react-flow-auto-layout
 
 ## It deletes the boilerplate
 
-Laying out variable-size nodes by hand means measuring them first: render hidden, wait for React Flow to report sizes, lay out, reveal, and re-layout when a node changes. That is the same fragile block in every project. The hook is all of it.
-
-<table>
-<tr><th>Before, by hand</th><th>After</th></tr>
-<tr>
-<td>
+Laying out variable-size nodes by hand means measuring them first: render hidden, wait for React Flow to report sizes, lay out, reveal, and re-layout when a node changes. That is the same fragile block in every project, and it still centers on the barycenter and kinks:
 
 ```tsx
-const [nodes, setNodes, onNodesChange] =
-  useNodesState(seed.map((n) => ({
-    ...n, style: { visibility: "hidden" },
-  })));
+// The usual hand-rolled version:
+const [nodes, setNodes, onNodesChange] = useNodesState(
+  seed.map((n) => ({ ...n, style: { visibility: "hidden" } })),
+);
 const [edges, , onEdgesChange] = useEdgesState(seedEdges);
 const initialized = useNodesInitialized();
 const sizes = useRef(new Map());
@@ -111,9 +106,7 @@ useEffect(() => {
   g.setDefaultEdgeLabel(() => ({}));
   for (const n of nodes) {
     const s = sizes.current.get(n.id) ?? {};
-    g.setNode(n.id, {
-      width: s.width ?? 244, height: s.height ?? 80,
-    });
+    g.setNode(n.id, { width: s.width ?? 244, height: s.height ?? 80 });
   }
   for (const e of edges) g.setEdge(e.source, e.target);
   dagre.layout(g);
@@ -126,29 +119,16 @@ useEffect(() => {
     };
   }));
 }, [initialized, nodes, edges, setNodes]);
-// ...and it still centers on the barycenter and kinks.
 ```
 
-</td>
-<td>
+The hook is all of that, and it centers on the true bounding box and keeps chains straight:
 
 ```tsx
-const {
-  nodes,
-  edges,
-  onNodesChange,
-  onEdgesChange,
-} = useAutoLayout({
+const { nodes, edges, onNodesChange, onEdgesChange } = useAutoLayout({
   nodes: seed,
   edges: seedEdges,
 });
 ```
-
-That is the whole thing, and it centers on the true bounding box and keeps chains straight.
-
-</td>
-</tr>
-</table>
 
 ## Add it with your AI agent
 
