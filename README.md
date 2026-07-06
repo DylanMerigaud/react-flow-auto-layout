@@ -11,7 +11,7 @@ The one that handles variable-size nodes: true bounding-box centering and straig
 [![types](https://img.shields.io/npm/types/react-flow-auto-layout)](https://www.npmjs.com/package/react-flow-auto-layout)
 [![license](https://img.shields.io/npm/l/react-flow-auto-layout?color=blue)](./LICENSE)
 
-### ▶︎ [Live demo: the same graph, plain dagre vs. this library](https://react-flow-auto-layout-ecru.vercel.app)
+### ▶︎ [Live demo: change the direction, edges, and spacing, watch it recenter](https://react-flow-auto-layout-ecru.vercel.app)
 
 </div>
 
@@ -58,6 +58,7 @@ It also keeps **fan-out branches in your declared edge order** instead of lettin
 - 🔀 **Fan-out in your edge order**, not reshuffled
 - ↕️ **Left-to-right or top-to-bottom**, one flag
 - 🪝 **A hook that does the measuring for you**, or a pure function if you would rather
+- 🎨 **No CSS to import.** It only computes positions; style your nodes however you like
 - 🧊 **Zero runtime deps** of its own (dagre + React Flow are peers)
 - 📦 **Dual ESM + CJS**, full types, tree-shakeable, `sideEffects: false`
 - 🔒 **Strict TypeScript**, published with provenance
@@ -74,6 +75,81 @@ yarn add react-flow-auto-layout
 
 `@xyflow/react` and `dagre` are peer dependencies you already have with React Flow. `react` and `react-dom` are peers too, but only the `/react` hook needs them; the core function is framework-agnostic.
 
+## It deletes the boilerplate
+
+Laying out variable-size nodes by hand means measuring them first: render hidden, wait for React Flow to report sizes, lay out, reveal, and re-layout when a node changes. That is the same fragile block in every project. The hook is all of it.
+
+<table>
+<tr><th>Before, by hand</th><th>After</th></tr>
+<tr>
+<td>
+
+```tsx
+const [nodes, setNodes, onNodesChange] =
+  useNodesState(seed.map((n) => ({
+    ...n, style: { visibility: "hidden" },
+  })));
+const [edges, , onEdgesChange] = useEdgesState(seedEdges);
+const initialized = useNodesInitialized();
+const sizes = useRef(new Map());
+const laidOut = useRef(false);
+
+const onChange = useCallback((changes) => {
+  onNodesChange(changes);
+  for (const c of changes) {
+    if (c.type === "dimensions" && c.dimensions) {
+      sizes.current.set(c.id, c.dimensions);
+    }
+  }
+}, [onNodesChange]);
+
+useEffect(() => {
+  if (!initialized || laidOut.current) return;
+  laidOut.current = true;
+  const g = new dagre.graphlib.Graph();
+  g.setGraph({ rankdir: "LR" });
+  g.setDefaultEdgeLabel(() => ({}));
+  for (const n of nodes) {
+    const s = sizes.current.get(n.id) ?? {};
+    g.setNode(n.id, {
+      width: s.width ?? 244, height: s.height ?? 80,
+    });
+  }
+  for (const e of edges) g.setEdge(e.source, e.target);
+  dagre.layout(g);
+  setNodes((cur) => cur.map((n) => {
+    const p = g.node(n.id);
+    return {
+      ...n,
+      position: { x: p.x - p.width / 2, y: p.y - p.height / 2 },
+      style: { visibility: "visible" },
+    };
+  }));
+}, [initialized, nodes, edges, setNodes]);
+// ...and it still centers on the barycenter and kinks.
+```
+
+</td>
+<td>
+
+```tsx
+const {
+  nodes,
+  edges,
+  onNodesChange,
+  onEdgesChange,
+} = useAutoLayout({
+  nodes: seed,
+  edges: seedEdges,
+});
+```
+
+That is the whole thing, and it centers on the true bounding box and keeps chains straight.
+
+</td>
+</tr>
+</table>
+
 ## Add it with your AI agent
 
 Using Claude Code, Cursor, or another coding agent? Paste this prompt and it will wire the hook into your existing React Flow graph.
@@ -81,10 +157,13 @@ Using Claude Code, Cursor, or another coding agent? Paste this prompt and it wil
 ````text
 Add `react-flow-auto-layout` to this project to auto-lay-out our React Flow graph.
 
-1. Install it with the project's package manager (detect pnpm/yarn/npm from the
-   lockfile): `pnpm add react-flow-auto-layout` OR `yarn add react-flow-auto-layout`
-   OR `npm i react-flow-auto-layout`. It has peer deps `@xyflow/react` and `dagre`
-   (and `react`), which a React Flow project already has.
+1. Install it with the project's package manager, detected from the lockfile:
+   pnpm-lock.yaml -> `pnpm add react-flow-auto-layout`,
+   yarn.lock -> `yarn add react-flow-auto-layout`,
+   package-lock.json -> `npm i react-flow-auto-layout`,
+   bun.lockb -> `bun add react-flow-auto-layout`.
+   It has peer deps `@xyflow/react` and `dagre` (and `react`), which a React Flow
+   project already has.
 
 2. In the component that renders <ReactFlow>, replace the manual node/edge state
    with the hook:
@@ -107,7 +186,8 @@ Add `react-flow-auto-layout` to this project to auto-lay-out our React Flow grap
 
 4. It measures our real node sizes automatically, so custom nodes with variable
    height work with no extra config. Do not set positions on the source nodes; the
-   hook computes them.
+   hook computes them. There is no CSS to import from this package; keep our existing
+   React Flow stylesheet and node styles.
 ````
 
 ## Usage
