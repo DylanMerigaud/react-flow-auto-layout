@@ -66,9 +66,49 @@ It also keeps **fan-out branches in your declared edge order** instead of lettin
 
 ```bash
 npm i react-flow-auto-layout
+# or
+pnpm add react-flow-auto-layout
+# or
+yarn add react-flow-auto-layout
 ```
 
 `@xyflow/react` and `dagre` are peer dependencies you already have with React Flow. `react` and `react-dom` are peers too, but only the `/react` hook needs them; the core function is framework-agnostic.
+
+## Add it with your AI agent
+
+Using Claude Code, Cursor, or another coding agent? Paste this prompt and it will wire the hook into your existing React Flow graph.
+
+````text
+Add `react-flow-auto-layout` to this project to auto-lay-out our React Flow graph.
+
+1. Install it with the project's package manager (detect pnpm/yarn/npm from the
+   lockfile): `pnpm add react-flow-auto-layout` OR `yarn add react-flow-auto-layout`
+   OR `npm i react-flow-auto-layout`. It has peer deps `@xyflow/react` and `dagre`
+   (and `react`), which a React Flow project already has.
+
+2. In the component that renders <ReactFlow>, replace the manual node/edge state
+   with the hook:
+
+   ```tsx
+   import { useAutoLayout } from "react-flow-auto-layout/react";
+
+   const { nodes, edges, onNodesChange, onEdgesChange } = useAutoLayout({
+     nodes: sourceNodes, // our source nodes (positions are recomputed)
+     edges: sourceEdges,
+     // vertical: true, // set for a top-to-bottom layout
+   });
+   ```
+
+   Pass nodes, edges, onNodesChange, and onEdgesChange to <ReactFlow>.
+
+3. Two requirements: the hook must run inside a <ReactFlowProvider>, and
+   onNodesChange MUST be wired to <ReactFlow onNodesChange={...} /> or the layout
+   never runs (it needs the measurement events).
+
+4. It measures our real node sizes automatically, so custom nodes with variable
+   height work with no extra config. Do not set positions on the source nodes; the
+   hook computes them.
+````
 
 ## Usage
 
