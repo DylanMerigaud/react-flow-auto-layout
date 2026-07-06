@@ -2,7 +2,9 @@
 
 Auto layout for [React Flow](https://reactflow.dev), built on [dagre](https://github.com/dagrejs/dagre), that handles the things a plain dagre pass gets wrong: **variable-size nodes**, **true centering**, and **straight linear edges**.
 
-[![CI](https://github.com/DylanMerigaud/react-flow-auto-layout/actions/workflows/ci.yml/badge.svg)](https://github.com/DylanMerigaud/react-flow-auto-layout/actions/workflows/ci.yml) ![npm](https://img.shields.io/npm/v/react-flow-auto-layout) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6) ![license](https://img.shields.io/badge/license-MIT-blue)
+[![CI](https://github.com/DylanMerigaud/react-flow-auto-layout/actions/workflows/ci.yml/badge.svg)](https://github.com/DylanMerigaud/react-flow-auto-layout/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/react-flow-auto-layout)](https://www.npmjs.com/package/react-flow-auto-layout) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6) ![license](https://img.shields.io/badge/license-MIT-blue)
+
+### ▶︎ [Live demo: the same graph, plain dagre vs. this library →](https://react-flow-auto-layout-ecru.vercel.app)
 
 <!-- TODO: before/after GIF here (dagre kinked + off-center vs. this: straight + centered) -->
 
