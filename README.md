@@ -56,6 +56,7 @@ It also keeps **fan-out branches in your declared edge order** instead of lettin
 - 📏 **Variable width and height** per node, from real measurements
 - 📐 **Straight linear edges**, no kinks on `A → B → C` runs
 - 🔀 **Fan-out in your edge order**, not reshuffled
+- 🪢 **Aligned step-edge elbows** across variable-size nodes (optional `AlignedStepEdge`)
 - ↕️ **Left-to-right or top-to-bottom**, one flag
 - 🪝 **A hook that does the measuring for you**, or a pure function if you would rather
 - 🎨 **No CSS to import.** It only computes positions; style your nodes however you like
@@ -231,6 +232,35 @@ const positioned = layout(nodes, edges, {
   vertical: false,
 });
 ```
+
+### Aligned step edges (optional)
+
+With **step** edges (right-angle elbows), a fan-out or join across variable-size nodes can bend at different points, so a bigger sibling drags its connector out of line. `AlignedStepEdge` pins each elbow to the shared hub (the one source of a fan-out, the one target of a join) so they line up. `withAlignedElbows` tags your edges automatically by reading the graph.
+
+```tsx
+import { useAutoLayout, AlignedStepEdge, withAlignedElbows } from "react-flow-auto-layout/react";
+
+const edgeTypes = { alignedStep: AlignedStepEdge };
+
+function Graph({ sourceNodes, sourceEdges }) {
+  const { nodes, edges, onNodesChange, onEdgesChange } = useAutoLayout({
+    nodes: sourceNodes,
+    edges: withAlignedElbows(sourceEdges).map((e) => ({ ...e, type: "alignedStep" })),
+  });
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      edgeTypes={edgeTypes}
+    />
+  );
+}
+```
+
+This only applies to step edges; bezier and straight edges have no elbow to align.
 
 ## API
 

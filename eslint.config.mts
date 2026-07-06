@@ -21,7 +21,7 @@ export default tseslint.config(
   ...tseslint.configs.recommendedTypeChecked,
 
   {
-    files: ["**/*.{ts,mts}"],
+    files: ["**/*.{ts,tsx,mts}"],
     languageOptions: {
       parserOptions: {
         projectService: true,
