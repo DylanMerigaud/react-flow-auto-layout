@@ -21,12 +21,15 @@ export function CardNode({ data }: NodeProps<Node<CardData>>) {
         width: 244,
         boxSizing: "border-box",
         borderRadius: 10,
-        border: "1px solid #E2E8F0",
+        border: data.live ? "1px solid #6366F1" : "1px solid #E2E8F0",
         borderLeft: `3px solid ${accent}`,
         background: "#fff",
         padding: "12px 14px",
-        boxShadow: "0 1px 2px rgba(16,24,40,0.06)",
+        boxShadow: data.live
+          ? "0 0 0 3px rgba(99,102,241,0.18), 0 4px 12px rgba(99,102,241,0.15)"
+          : "0 1px 2px rgba(16,24,40,0.06)",
         fontFamily: "ui-sans-serif, system-ui, sans-serif",
+        transition: "box-shadow 0.3s ease",
       }}
     >
       <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />

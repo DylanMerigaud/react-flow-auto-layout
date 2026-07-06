@@ -1,4 +1,4 @@
-import { AfterPanel, BeforePanel } from "./panels";
+import { LiveGraph } from "./LiveGraph";
 
 export function App() {
   return (
@@ -7,9 +7,10 @@ export function App() {
         <div>
           <h1>react-flow-auto-layout</h1>
           <p>
-            Auto layout for React Flow, built on dagre. The same graph, same
-            variable-height cards. Left: a naive fixed-size dagre pass. Right:
-            this library.
+            Auto layout for React Flow, built on dagre. Nodes are variable size,
+            so the layout centers each parent on the true bounding box of its
+            children and keeps linear chains straight. Watch it recenter live as
+            the highlighted card grows and shrinks.
           </p>
         </div>
         <nav className="links">
@@ -20,24 +21,9 @@ export function App() {
         </nav>
       </header>
 
-      <div className="grid">
-        <section className="panel">
-          <div className="label label-before">
-            Plain dagre (fixed height) — off-center, kinked
-          </div>
-          <div className="canvas">
-            <BeforePanel />
-          </div>
-        </section>
-        <section className="panel">
-          <div className="label label-after">
-            react-flow-auto-layout — centered, straight
-          </div>
-          <div className="canvas">
-            <AfterPanel />
-          </div>
-        </section>
-      </div>
+      <section className="stage">
+        <LiveGraph />
+      </section>
 
       <footer className="foot">
         <code>npm i react-flow-auto-layout</code>

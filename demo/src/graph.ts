@@ -5,12 +5,14 @@ export type CardData = {
   title: string;
   body?: string;
   tone?: "start" | "branch" | "join" | "end";
+  /** The card whose size changes on the loop; highlighted so the eye follows it. */
+  live?: boolean;
 };
 
-// A workflow-shaped DAG: a linear intro, a three-way fan-out with cards of very
-// different heights, then a join and a tail. The height variety is the whole point:
-// it is what makes a naive fixed-size dagre pass drift and kink.
-export const nodes: Node<CardData>[] = [
+// A workflow-shaped DAG: a linear intro, a three-way fan-out, then a join and a
+// tail. The "Director approval" card is the one that changes size on a loop, so the
+// layout has to recenter its neighbors and keep the chain straight, live.
+export const baseNodes: Node<CardData>[] = [
   { id: "in", position: { x: 0, y: 0 }, data: { title: "Invoice received", tone: "start" } },
   {
     id: "extract",
@@ -29,11 +31,7 @@ export const nodes: Node<CardData>[] = [
   {
     id: "dir",
     position: { x: 0, y: 0 },
-    data: {
-      title: "Director approval",
-      body: "Required above $25k. Routes to the cost-center owner, resolved to a real person from the org chart.",
-      tone: "branch",
-    },
+    data: { title: "Director approval", tone: "branch" },
   },
   {
     id: "dept",
@@ -62,4 +60,13 @@ export const edges: Edge[] = [
   { id: "dir-post", source: "dir", target: "post" },
   { id: "dept-post", source: "dept", target: "post" },
   { id: "post-done", source: "post", target: "done" },
+];
+
+// The rotating body text for the "Director approval" card. Each step changes its
+// height, which is what forces the live recentering. Empty string = a short card.
+export const dirBodies: string[] = [
+  "",
+  "Required above $25k.",
+  "Required above $25k. Routes to the cost-center owner, resolved to a real person from the org chart, with a note on why it triggered.",
+  "Required above $25k. Routes to the cost-center owner.",
 ];
