@@ -26,6 +26,10 @@
   "engines": {
     "node": ">=18"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -70,10 +74,11 @@
     "lint": "eslint .",
     "knip": "knip",
     "test": "tsx --test \"test/**/*.test.ts\"",
-    "format": "prettier --write \"**/*.{ts,mts,json}\"",
-    "format:check": "prettier --check \"**/*.{ts,mts,json}\"",
+    "format": "prettier --write \"{src,test,eslint-rules}/**/*.ts\" \"*.{ts,mts,json}\"",
+    "format:check": "prettier --check \"{src,test,eslint-rules}/**/*.ts\" \"*.{ts,mts,json}\"",
     "attw": "attw --pack .",
     "publint": "publint",
+    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm knip && pnpm test && pnpm build && pnpm publint && pnpm attw --pack .",
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {

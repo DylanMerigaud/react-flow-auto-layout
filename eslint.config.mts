@@ -13,7 +13,8 @@ import { customRules } from "./eslint-rules/index";
  */
 export default tseslint.config(
   {
-    ignores: ["dist/**", "node_modules/**"],
+    // The demo is a separate sub-project with its own toolchain; don't lint it here.
+    ignores: ["dist/**", "node_modules/**", "demo/**"],
   },
 
   js.configs.recommended,

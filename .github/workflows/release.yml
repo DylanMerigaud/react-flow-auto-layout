@@ -1,0 +1,69 @@
+name: Release
+
+# Publish to npm when a version tag is pushed:
+#   npm version patch   # bumps package.json + creates the vX.Y.Z tag
+#   git push --follow-tags
+# Publishing uses npm Trusted Publishing (OIDC), so there is NO npm token stored
+# anywhere. npm generates a provenance attestation automatically. Configure the
+# trusted publisher once at https://www.npmjs.com/package/react-flow-auto-layout/access
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  # Required for OIDC trusted publishing + provenance.
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing needs npm >= 11.5.1; the runner ships older.
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The tag only ships if the whole gate is green, same checks as CI.
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Dead-code check
+        run: pnpm knip
+      - name: Test
+        run: pnpm test
+      - name: Build
+        run: pnpm build
+      - name: Package lint
+        run: pnpm publint
+      - name: Types resolution
+        run: pnpm attw --pack .
+
+      # Fail loudly if the tag does not match the package.json version, so a
+      # mistagged push never publishes the wrong version.
+      - name: Verify tag matches package version
+        run: |
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$PKG_VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package version $PKG_VERSION"
+            exit 1
+          fi
+
+      # No NODE_AUTH_TOKEN on purpose: its presence makes npm use the legacy token
+      # path instead of OIDC. --provenance publishes the attestation.
+      - name: Publish to npm
+        run: npm publish --provenance --access public
