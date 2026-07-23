@@ -11,7 +11,7 @@ The one that handles variable-size nodes: true bounding-box centering and straig
 [![types](https://img.shields.io/npm/types/react-flow-auto-layout)](https://www.npmjs.com/package/react-flow-auto-layout)
 [![license](https://img.shields.io/npm/l/react-flow-auto-layout?color=blue)](./LICENSE)
 
-### ▶︎ [Live demo: change the direction, edges, and spacing, watch it recenter](https://react-flow-auto-layout-ecru.vercel.app)
+### ▶︎ [Live demo: change the direction, edges, and spacing, watch it recenter](https://react-flow-auto-layout.merigaud.com)
 
 </div>
 
